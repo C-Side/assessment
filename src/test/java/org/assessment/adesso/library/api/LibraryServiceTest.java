@@ -52,6 +52,7 @@ public class LibraryServiceTest {
 				"TheThirdTestAuthor",
 				Genre.NON_FICTION,
 				false);
+		book3.setLentToPerson(member);
 		LibraryFacade.allBooks.add(book3);
 	}
 
@@ -100,6 +101,7 @@ public class LibraryServiceTest {
 		assertThat(member.getBooks()).hasSize(1);
 		assertThat(member.getBooks()).first().isEqualTo(book);
 		assertThat(libraryService.getAllBooks()).first().extracting(Book::isAvailable).isEqualTo(false);
+		assertThat(libraryService.getAllBooks()).first().extracting(Book::getLentToPerson).isEqualTo(member);
 	}
 
 	@Test
@@ -159,6 +161,7 @@ public class LibraryServiceTest {
 		libraryService.returnBook(member, book3);
 		assertThat(member.getBooks()).hasSize(0);
 		assertThat(libraryService.getAllBooks()).first().extracting(Book::isAvailable).isEqualTo(true);
+		assertThat(libraryService.getAllBooks()).first().extracting(Book::getLentToPerson).isNull();
 	}
 
 	@Test
@@ -198,5 +201,27 @@ public class LibraryServiceTest {
 		libraryService.removeBookFromLibrary(librarian, book1);
 		assertThat(libraryService.getAllBooks()).hasSize(2);
 		assertThat(libraryService.getAllBooks().remove(book1)).isFalse();
+	}
+
+	@Test
+	public void getAllCopiesOfBook_shouldReturnCorrectList() {
+		Book book1 = new Book(1,
+				"TestBook",
+				"TestAuthor",
+				Genre.FANTASY,
+				true);
+
+		Book book2 = new Book(2,
+				"AnotherBook",
+				"TestAuthor",
+				Genre.FANTASY,
+				true);
+
+		for (int i = 0; i < 4; i++) {
+			libraryService.getAllBooks().add(book1);
+		}
+
+		assertThat(libraryService.getAllCopiesOfBook(book1)).hasSize(5);
+		assertThat(libraryService.getAllCopiesOfBook(book2)).hasSize(0);
 	}
 }

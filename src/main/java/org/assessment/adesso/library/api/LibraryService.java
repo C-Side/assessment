@@ -25,4 +25,6 @@ public interface LibraryService {
 	void returnBook(Person person, Book bookToBeReturned) throws BusinessException;
 
 	void removeBookFromLibrary(Person person, Book bookToBeRemoved) throws BusinessException;
+
+	List<Book> getAllCopiesOfBook(Book typeOfBook);
 }

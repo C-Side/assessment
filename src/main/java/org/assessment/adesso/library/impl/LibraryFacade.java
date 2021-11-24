@@ -69,6 +69,7 @@ public class LibraryFacade implements LibraryService {
 			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeLend));
 			if (bookFromStock.isAvailable()) {
 				person.getBooks().add(bookToBeLend);
+				bookFromStock.setLentToPerson(person);
 				bookFromStock.setAvailable(false);
 			} else {
 				String errorMessage = String.format("The book with id %d is not available.",
@@ -88,6 +89,7 @@ public class LibraryFacade implements LibraryService {
 		try {
 			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeReturned));
 			bookFromStock.setAvailable(true);
+			bookFromStock.setLentToPerson(null);
 			boolean bookWasInPossession = person.getBooks().remove(bookToBeReturned);
 			if (!bookWasInPossession) {
 				String errorMessage = String.format("The book with title %s was never in the possession of the person.",
@@ -118,6 +120,13 @@ public class LibraryFacade implements LibraryService {
 					bookToBeRemoved.getTitle());
 			logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_FOUND);
 		}
+	}
+
+	@Override
+	public List<Book> getAllCopiesOfBook(Book typeOfBook) {
+		return allBooks.stream()
+				.filter(book -> book.equals(typeOfBook))
+				.collect(Collectors.toList());
 	}
 
 	private void throwExceptionIfMember(Person person, String message) throws BusinessException {

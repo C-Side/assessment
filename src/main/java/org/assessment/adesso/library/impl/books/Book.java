@@ -1,6 +1,7 @@
 package org.assessment.adesso.library.impl.books;
 
 import org.assessment.adesso.library.impl.books.type.Genre;
+import org.assessment.adesso.library.impl.members.Person;
 
 import java.util.Objects;
 
@@ -15,6 +16,7 @@ public class Book {
 	private String author;
 	private Genre genre;
 	private boolean available;
+	private Person lentToPerson;
 
 	public Book() {
 	}
@@ -65,6 +67,14 @@ public class Book {
 
 	public void setAvailable(boolean available) {
 		this.available = available;
+	}
+
+	public Person getLentToPerson() {
+		return lentToPerson;
+	}
+
+	public void setLentToPerson(Person lentToPerson) {
+		this.lentToPerson = lentToPerson;
 	}
 
 	@Override
