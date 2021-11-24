@@ -9,11 +9,15 @@ plugins {
     id 'org.springframework.boot' version '2.5.6'
 }
 
+test {
+    useJUnitPlatform()
+}
+
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 
-group 'org.assessment'
+group 'org.assessment.adesso'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 11
