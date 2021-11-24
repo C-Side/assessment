@@ -4,16 +4,16 @@ package org.assessment.adesso.common.exceptions;
  * @author : Klinghammer, Lukas; eXXcellent solutions
  * @version : 24.11.2021
  **/
-public abstract class BusinessException extends Exception {
+public class BusinessException extends Exception {
 
-	private final int errorCode;
+	private final BusinessExceptionType exceptionType;
 
-	public BusinessException(String message, int errorCode) {
+	public BusinessException(String message, BusinessExceptionType exceptionType) {
 		super(message);
-		this.errorCode = errorCode;
+		this.exceptionType = exceptionType;
 	}
 
-	public int getErrorCode() {
-		return errorCode;
+	public BusinessExceptionType getExceptionType() {
+		return exceptionType;
 	}
 }

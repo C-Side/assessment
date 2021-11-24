@@ -1,10 +1,7 @@
 package org.assessment.adesso.library.api;
 
+import org.assessment.adesso.common.exceptions.BusinessException;
 import org.assessment.adesso.library.impl.books.Book;
-import org.assessment.adesso.library.impl.exceptions.BookNotFoundException;
-import org.assessment.adesso.library.impl.exceptions.BookUnavailableException;
-import org.assessment.adesso.library.impl.exceptions.ForbiddenException;
-import org.assessment.adesso.library.impl.exceptions.NewLibrarianException;
 import org.assessment.adesso.library.impl.members.Person;
 
 import java.util.List;
@@ -15,11 +12,11 @@ import java.util.List;
  **/
 public interface LibraryService {
 
-	void addNewBook(Person person, Book bookToBeAdded) throws ForbiddenException;
+	void addNewBook(Person person, Book bookToBeAdded) throws BusinessException;
 
-	void addNewMember(Person person, Person personToBeAdded) throws ForbiddenException, NewLibrarianException;
+	void addNewMember(Person person, Person personToBeAdded) throws BusinessException;
 
-	void lendBook(Person person, Book bookToBeLend) throws ForbiddenException, BookUnavailableException, BookNotFoundException;
+	void lendBook(Person person, Book bookToBeLend) throws BusinessException;
 
 	List<Book> getAllBooks();
 

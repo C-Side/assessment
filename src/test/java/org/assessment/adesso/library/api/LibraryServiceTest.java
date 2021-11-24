@@ -1,12 +1,10 @@
 package org.assessment.adesso.library.api;
 
+import org.assessment.adesso.common.exceptions.BusinessException;
+import org.assessment.adesso.common.exceptions.BusinessExceptionType;
 import org.assessment.adesso.library.impl.LibraryFacade;
 import org.assessment.adesso.library.impl.books.Book;
 import org.assessment.adesso.library.impl.books.type.Genre;
-import org.assessment.adesso.library.impl.exceptions.BookNotFoundException;
-import org.assessment.adesso.library.impl.exceptions.BookUnavailableException;
-import org.assessment.adesso.library.impl.exceptions.ForbiddenException;
-import org.assessment.adesso.library.impl.exceptions.NewLibrarianException;
 import org.assessment.adesso.library.impl.members.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,26 +65,29 @@ public class LibraryServiceTest {
 	public void addNewBooksTest_ShouldThrowExceptions() {
 		Book testBook = new Book();
 		assertThatThrownBy(() -> libraryService.addNewBook(member, testBook))
-				.isInstanceOf(ForbiddenException.class)
+				.isInstanceOf(BusinessException.class)
 				.hasMessage("The calling person with id 2 is not allowed to add new books to the library")
-				.extracting("errorCode").isEqualTo(4003);
+				.extracting("exceptionType")
+				.extracting("name", "errorCode").contains(BusinessExceptionType.FORBIDDEN.name(), 4003);
 	}
 
 	@Test
 	public void addNewMembersTest_ShouldThrowExceptions() {
 		assertThatThrownBy(() -> libraryService.addNewMember(member, member))
-				.isInstanceOf(ForbiddenException.class)
+				.isInstanceOf(BusinessException.class)
 				.hasMessage("The calling person with id 2 is not allowed to add new persons to the library")
-				.extracting("errorCode").isEqualTo(4003);
+				.extracting("exceptionType")
+				.extracting("name", "errorCode").contains(BusinessExceptionType.FORBIDDEN.name(), 4003);
 
 		assertThatThrownBy(() -> libraryService.addNewMember(librarian, librarian))
-				.isInstanceOf(NewLibrarianException.class)
+				.isInstanceOf(BusinessException.class)
 				.hasMessage("The new person does not have the role MEMBER")
-				.extracting("errorCode").isEqualTo(4002);
+				.extracting("exceptionType")
+				.extracting("name", "errorCode").contains(BusinessExceptionType.NEW_LIBRARIAN.name(), 4002);
 	}
 
 	@Test
-	public void lendBook_ShouldLendBooksCorrectly() throws BookUnavailableException, BookNotFoundException, ForbiddenException {
+	public void lendBook_ShouldLendBooksCorrectly() throws BusinessException {
 		Book book = new Book(1,
 				"TestBook",
 				"TestAuthor",
@@ -108,14 +109,16 @@ public class LibraryServiceTest {
 				false);
 
 		assertThatThrownBy(() -> libraryService.lendBook(librarian, book3))
-				.isInstanceOf(ForbiddenException.class)
+				.isInstanceOf(BusinessException.class)
 				.hasMessage("The calling person with id 1 is not allowed lend books.")
-				.extracting("errorCode").isEqualTo(4003);
+				.extracting("exceptionType")
+				.extracting("name", "errorCode").contains(BusinessExceptionType.FORBIDDEN.name(), 4003);
 
 		assertThatThrownBy(() -> libraryService.lendBook(member, book3))
-				.isInstanceOf(BookUnavailableException.class)
+				.isInstanceOf(BusinessException.class)
 				.hasMessage("The book with id 3 is not available.")
-				.extracting("errorCode").isEqualTo(4001);
+				.extracting("exceptionType")
+				.extracting("name", "errorCode").contains(BusinessExceptionType.BOOK_UNAVAILABLE.name(), 4001);
 
 		Book nonLibraryBook = new Book(4,
 				"NotInLibrary",
@@ -124,8 +127,9 @@ public class LibraryServiceTest {
 				true);
 
 		assertThatThrownBy(() -> libraryService.lendBook(member, nonLibraryBook))
-				.isInstanceOf(BookNotFoundException.class)
+				.isInstanceOf(BusinessException.class)
 				.hasMessage("The book with title NotInLibrary was not found in the library.")
-				.extracting("errorCode").isEqualTo(4000);
+				.extracting("exceptionType")
+				.extracting("name", "errorCode").contains(BusinessExceptionType.BOOK_NOT_FOUND.name(), 4000);
 	}
 }
