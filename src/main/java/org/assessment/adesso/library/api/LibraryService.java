@@ -6,7 +6,6 @@ import org.assessment.adesso.library.impl.exceptions.BookUnavailableException;
 import org.assessment.adesso.library.impl.exceptions.ForbiddenException;
 import org.assessment.adesso.library.impl.exceptions.NewLibrarianException;
 import org.assessment.adesso.library.impl.members.Person;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

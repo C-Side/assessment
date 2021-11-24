@@ -8,7 +8,6 @@ import org.assessment.adesso.library.impl.exceptions.BookUnavailableException;
 import org.assessment.adesso.library.impl.exceptions.ForbiddenException;
 import org.assessment.adesso.library.impl.exceptions.NewLibrarianException;
 import org.assessment.adesso.library.impl.members.Person;
-import org.assessment.adesso.library.impl.members.type.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.filter;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatThrownBy;
 
 /**
  * @author : Klinghammer, Lukas; eXXcellent solutions

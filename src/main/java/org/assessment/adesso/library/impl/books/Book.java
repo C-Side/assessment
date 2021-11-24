@@ -1,6 +1,5 @@
 package org.assessment.adesso.library.impl.books;
 
-import org.assessment.adesso.library.impl.LibraryFacade;
 import org.assessment.adesso.library.impl.books.type.Genre;
 
 import java.util.Objects;
