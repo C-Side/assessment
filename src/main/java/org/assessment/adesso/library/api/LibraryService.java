@@ -20,7 +20,7 @@ public interface LibraryService {
 
 	void addNewMember(Person person, Person personToBeAdded) throws BusinessException;
 
-	void lendBook(Person person, Book bookToBeLend) throws BusinessException;
+	void lendBook(Person person, Book bookToBeLent) throws BusinessException;
 
 	void returnBook(Person person, Book bookToBeReturned) throws BusinessException;
 

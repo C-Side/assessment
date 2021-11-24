@@ -61,14 +61,14 @@ public class LibraryFacade implements LibraryService {
 	}
 
 	@Override
-	public void lendBook(Person person, Book bookToBeLend) throws BusinessException {
+	public void lendBook(Person person, Book bookToBeLent) throws BusinessException {
 		throwExceptionIfLibrarian(person, "lend books");
 		checkLentBooks(person);
 
 		try {
-			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeLend));
+			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeLent));
 			if (bookFromStock.isAvailable()) {
-				person.getBooks().add(bookToBeLend);
+				person.getBooks().add(bookToBeLent);
 				bookFromStock.setLentToPerson(person);
 				bookFromStock.setAvailable(false);
 			} else {
@@ -78,7 +78,7 @@ public class LibraryFacade implements LibraryService {
 			}
 		} catch (IndexOutOfBoundsException exception) {
 			String errorMessage = String.format("The book with title %s was not found in the library.",
-					bookToBeLend.getTitle());
+					bookToBeLent.getTitle());
 			logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_FOUND);
 		}
 	}
@@ -87,15 +87,15 @@ public class LibraryFacade implements LibraryService {
 	public void returnBook(Person person, Book bookToBeReturned) throws BusinessException {
 		throwExceptionIfLibrarian(person, "return books");
 		try {
-			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeReturned));
-			bookFromStock.setAvailable(true);
-			bookFromStock.setLentToPerson(null);
 			boolean bookWasInPossession = person.getBooks().remove(bookToBeReturned);
 			if (!bookWasInPossession) {
 				String errorMessage = String.format("The book with title %s was never in the possession of the person.",
 						bookToBeReturned.getTitle());
 				logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_IN_POSSESSION);
 			}
+			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeReturned));
+			bookFromStock.setAvailable(true);
+			bookFromStock.setLentToPerson(null);
 		} catch (IndexOutOfBoundsException exception) {
 			String errorMessage = String.format("The book with title %s was not found in the library.",
 					bookToBeReturned.getTitle());
@@ -147,17 +147,17 @@ public class LibraryFacade implements LibraryService {
 		}
 	}
 
+	private void logErrorAndThrowException(String errorMessage, BusinessExceptionType exceptionType) throws BusinessException {
+		LOGGER.error(errorMessage);
+		throw new BusinessException(errorMessage, exceptionType);
+	}
+
 	private void checkLentBooks(Person person) throws BusinessException {
 		if (person.getBooks().size() == 7) {
 			String errorMessage = String.format("The person with id %d already lent seven books.",
 					person.getId());
 			logErrorAndThrowException(errorMessage, BusinessExceptionType.TOO_MANY_BOOKS);
 		}
-	}
-
-	private void logErrorAndThrowException(String errorMessage, BusinessExceptionType exceptionType) throws BusinessException {
-		LOGGER.error(errorMessage);
-		throw new BusinessException(errorMessage, exceptionType);
 	}
 
 	private static void initialSetup() {
