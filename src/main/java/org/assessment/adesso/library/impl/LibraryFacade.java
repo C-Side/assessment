@@ -31,72 +31,6 @@ public class LibraryFacade implements LibraryService {
 	}
 
 	@Override
-	public void addNewBook(Person person, Book bookToBeAdded) throws BusinessException {
-		if (person.getRole() != Role.LIBRARIAN) {
-			String errorMessage = String.format("The calling person with id %d is not allowed to add new books to the library",
-					person.getId());
-			LOGGER.error(errorMessage);
-			throw new BusinessException(errorMessage, BusinessExceptionType.FORBIDDEN);
-		} else {
-			allBooks.add(bookToBeAdded);
-		}
-	}
-
-	@Override
-	public void addNewMember(Person person, Person personToBeAdded) throws BusinessException {
-		if (person.getRole() != Role.LIBRARIAN) {
-			String errorMessage = String.format("The calling person with id %d is not allowed to add new persons to the library",
-					person.getId());
-			LOGGER.error(errorMessage);
-			throw new BusinessException(errorMessage, BusinessExceptionType.FORBIDDEN);
-		} else if (personToBeAdded.getRole() == Role.LIBRARIAN) {
-			String errorMessage = "The new person does not have the role MEMBER";
-			LOGGER.error(errorMessage);
-			throw new BusinessException(errorMessage, BusinessExceptionType.NEW_LIBRARIAN);
-		} else {
-			allPersons.add(personToBeAdded);
-		}
-	}
-
-	@Override
-	public void lendBook(Person person, Book bookToBeLend) throws BusinessException {
-		if (person.getRole() == Role.LIBRARIAN) {
-			String errorMessage = String.format("The calling person with id %d is not allowed lend books.",
-					person.getId());
-			LOGGER.error(errorMessage);
-			throw new BusinessException(errorMessage, BusinessExceptionType.FORBIDDEN);
-		} else {
-			checkLentBooks(person);
-			try {
-				Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeLend));
-				if (bookFromStock.isAvailable()) {
-					person.getBooks().add(bookToBeLend);
-					bookFromStock.setAvailable(false);
-				} else {
-					String errorMessage = String.format("The book with id %d is not available.",
-							bookFromStock.getId());
-					LOGGER.error(errorMessage);
-					throw new BusinessException(errorMessage, BusinessExceptionType.BOOK_UNAVAILABLE);
-				}
-			} catch (IndexOutOfBoundsException exception) {
-				String errorMessage = String.format("The book with title %s was not found in the library.",
-						bookToBeLend.getTitle());
-				LOGGER.error(errorMessage);
-				throw new BusinessException(errorMessage, BusinessExceptionType.BOOK_NOT_FOUND);
-			}
-		}
-	}
-
-	private void checkLentBooks(Person person) throws BusinessException {
-		if (person.getBooks().size() == 7) {
-			String errorMessage = String.format("The person with id %d already lent seven books.",
-					person.getId());
-			LOGGER.error(errorMessage);
-			throw new BusinessException(errorMessage, BusinessExceptionType.TOO_MANY_BOOKS);
-		}
-	}
-
-	@Override
 	public List<Book> getAllBooks() {
 		return allBooks;
 	}
@@ -106,6 +40,115 @@ public class LibraryFacade implements LibraryService {
 		return allPersons.stream()
 				.filter(person -> person.getRole() == Role.MEMBER)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void addNewBook(Person person, Book bookToBeAdded) throws BusinessException {
+		throwExceptionIfMember(person, "add new books to the library");
+		allBooks.add(bookToBeAdded);
+	}
+
+	@Override
+	public void addNewMember(Person person, Person personToBeAdded) throws BusinessException {
+		throwExceptionIfMember(person, "add new members");
+
+		if (personToBeAdded.getRole() == Role.LIBRARIAN) {
+			String errorMessage = "The new person does not have the role MEMBER";
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.NEW_LIBRARIAN);
+		} else {
+			allPersons.add(personToBeAdded);
+		}
+	}
+
+	@Override
+	public void lendBook(Person person, Book bookToBeLend) throws BusinessException {
+		throwExceptionIfLibrarian(person, "lend books");
+		checkLentBooks(person);
+
+		try {
+			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeLend));
+			if (bookFromStock.isAvailable()) {
+				person.getBooks().add(bookToBeLend);
+				bookFromStock.setAvailable(false);
+			} else {
+				String errorMessage = String.format("The book with id %d is not available.",
+						bookFromStock.getId());
+				logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_UNAVAILABLE);
+			}
+		} catch (IndexOutOfBoundsException exception) {
+			String errorMessage = String.format("The book with title %s was not found in the library.",
+					bookToBeLend.getTitle());
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_FOUND);
+		}
+	}
+
+	@Override
+	public void returnBook(Person person, Book bookToBeReturned) throws BusinessException {
+		throwExceptionIfLibrarian(person, "return books");
+		try {
+			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeReturned));
+			bookFromStock.setAvailable(true);
+			boolean bookWasInPossession = person.getBooks().remove(bookToBeReturned);
+			if (!bookWasInPossession) {
+				String errorMessage = String.format("The book with title %s was never in the possession of the person.",
+						bookToBeReturned.getTitle());
+				logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_IN_POSSESSION);
+			}
+		} catch (IndexOutOfBoundsException exception) {
+			String errorMessage = String.format("The book with title %s was not found in the library.",
+					bookToBeReturned.getTitle());
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_FOUND);
+		}
+	}
+
+	@Override
+	public void removeBookFromLibrary(Person person, Book bookToBeRemoved) throws BusinessException {
+		throwExceptionIfMember(person, "remove books from the library");
+		try {
+			Book bookFromStock = allBooks.get(allBooks.indexOf(bookToBeRemoved));
+			if (bookFromStock.isAvailable()) {
+				allBooks.remove(bookToBeRemoved);
+			} else {
+				String errorMessage = String.format("The book with id %d is not available.",
+						bookFromStock.getId());
+				logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_UNAVAILABLE);
+			}
+		} catch (IndexOutOfBoundsException exception) {
+			String errorMessage = String.format("The book with title %s was not found in the library.",
+					bookToBeRemoved.getTitle());
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.BOOK_NOT_FOUND);
+		}
+	}
+
+	private void throwExceptionIfMember(Person person, String message) throws BusinessException {
+		if (person.getRole() == Role.MEMBER) {
+			String errorMessage = String.format("The calling person with id %d is not allowed to %s.",
+					person.getId(),
+					message);
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.FORBIDDEN);
+		}
+	}
+
+	private void throwExceptionIfLibrarian(Person person, String message) throws BusinessException {
+		if (person.getRole() == Role.LIBRARIAN) {
+			String errorMessage = String.format("The calling person with id %d is not allowed to %s.",
+					person.getId(),
+					message);
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.FORBIDDEN);
+		}
+	}
+
+	private void checkLentBooks(Person person) throws BusinessException {
+		if (person.getBooks().size() == 7) {
+			String errorMessage = String.format("The person with id %d already lent seven books.",
+					person.getId());
+			logErrorAndThrowException(errorMessage, BusinessExceptionType.TOO_MANY_BOOKS);
+		}
+	}
+
+	private void logErrorAndThrowException(String errorMessage, BusinessExceptionType exceptionType) throws BusinessException {
+		LOGGER.error(errorMessage);
+		throw new BusinessException(errorMessage, exceptionType);
 	}
 
 	private static void initialSetup() {
