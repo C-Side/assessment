@@ -1,6 +1,9 @@
 package org.assessment.adesso.library.impl.books;
 
+import org.assessment.adesso.library.impl.LibraryFacade;
 import org.assessment.adesso.library.impl.books.type.Genre;
+
+import java.util.Objects;
 
 /**
  * @author : Klinghammer, Lukas; eXXcellent solutions
@@ -12,15 +15,17 @@ public class Book {
 	private String title;
 	private String author;
 	private Genre genre;
+	private boolean available;
 
 	public Book() {
 	}
 
-	public Book(int id, String title, String author, Genre genre) {
+	public Book(int id, String title, String author, Genre genre, boolean available) {
 		this.id = id;
 		this.title = title;
 		this.author = author;
 		this.genre = genre;
+		this.available = available;
 	}
 
 	public int getId() {
@@ -53,5 +58,28 @@ public class Book {
 
 	public void setGenre(Genre genre) {
 		this.genre = genre;
+	}
+
+	public boolean isAvailable() {
+		return available;
+	}
+
+	public void setAvailable(boolean available) {
+		this.available = available;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Book book = (Book) o;
+		return Objects.equals(title, book.title) &&
+				Objects.equals(author, book.author) &&
+				genre == book.genre;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(title, author, genre);
 	}
 }
